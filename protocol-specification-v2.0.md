@@ -46,7 +46,7 @@ Version 2.0
 
 This protocol is designed for communicating with a motor controller over an I2C bus. Version 2.0 has been designed to work with SMBus masters, and adds some improvements over version 1.0.
 
-The device presents multiple control modes (listed in [section 3.3](#33-list-of-control-modes), each of which control the motor in a different way. In order to configure the control loops, a set of up to sixteen 16-bit parameters are available. These are listed in [section3.2](#32-list-of-parameters). For more information about parameters and control modes, see [section 3](#3-parameters-and-control-modes).
+The device presents multiple control modes (listed in [section 3.3](#33-list-of-control-modes), each of which control the motor in a different way. In order to configure the control loops, a set of up to sixteen 16-bit parameters are available. These are listed in [section 3.2](#32-list-of-parameters). For more information about parameters and control modes, see [section 3](#3-parameters-and-control-modes).
 
 In order to facilitate debugging, as well as enable data logging (among other possible use cases), the device includes a sample buffer for storing samples. Information about this can be found in [section 4](#4-the-sample-buffer).
 
