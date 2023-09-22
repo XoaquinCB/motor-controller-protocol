@@ -117,7 +117,7 @@ The "read word" protocol reads a 16-bit word of data after sending a command cod
 
              8          1          8           1   1
     |=Data=word=[7:0]=| A |=Data=word=[15:8]=| A | P |
-                                                   1
+                                               1
 ```
 
 ### (2.2.3) Read block
@@ -130,7 +130,7 @@ The "read block" protocol reads a block of N bytes ($0 \lt N \le 32$) after send
 
             8          1        8        1        8        1              8        1   1
     |=Byte=count=(N)=| A |=Data=byte=0=| A |=Data=byte=1=| A | ... |=Data=byte=N=| A | P |
-                                                                                       1
+                                                                                   1
 ```
 
 ## (2.3) List of commands
