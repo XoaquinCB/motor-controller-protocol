@@ -354,6 +354,7 @@ The following table lists all the data types that might be used by the protocol.
 | uint32  | 32-bit unsigned integer                          |
 | uint40  | 40-bit unsigned integer                          |
 | uint48  | 48-bit unsigned integer                          |
+| uint56  | 56-bit unsigned integer                          |
 | uint64  | 64-bit unsigned integer                          |
 | int8    | 8-bit signed integer                             |
 | int16   | 16-bit signed integer                            |
@@ -361,6 +362,7 @@ The following table lists all the data types that might be used by the protocol.
 | int32   | 32-bit signed integer                            |
 | int40   | 40-bit signed integer                            |
 | int48   | 48-bit signed integer                            |
+| int56   | 56-bit signed integer                            |
 | int64   | 64-bit signed integer                            |
 | float16 | 16-bit floating point (IEE 754 half-precision)   |
 | float32 | 32-bit floating point (IEE 754 single-precision) |
