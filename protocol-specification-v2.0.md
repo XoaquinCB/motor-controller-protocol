@@ -179,7 +179,7 @@ See [section 3](#3-parameters-and-control-modes) for more information about para
 - **Command code:** 0x10
 - **SMBus protocols:** read/write word
 
-Gets or sets the device's control mode. Only the control modes listed in [section 3.3](#33-list-of-control-modes) are allowed; attempting to write any other value will result in a NACK response after either of the data bytes, aborting the command. Reading the control mode will always return the last value succesfully set (with the exception of a hardware reset); the device will never chage the control mode automatically.
+Gets or sets the device's control mode. Only the control modes listed in [section 3.3](#33-list-of-control-modes) are allowed; attempting to write any other value will result in a NACK response after either of the data bytes, aborting the command. The device will always respond with an ACK to the command code. Reading the control mode will always return the last value succesfully set (with the exception of a hardware reset); the device will never chage the control mode automatically.
 
 See [section 3](#3-parameters-and-control-modes) for more information about control modes.
 
@@ -188,7 +188,7 @@ See [section 3](#3-parameters-and-control-modes) for more information about cont
 - **Command code:** 0x11
 - **SMBus protocols:** write word
 
-Used for sending dynamic update values to the controller. The way this data is interpreted depends on the current control mode. Some control modes may allow only certain values to be written; if an invalid value is written, the device will respond with a NACK after either of the data bytes, aborting the command. Some control modes may not support this command and will respond with a NACK to the command code.
+Used for sending dynamic update values to the controller. The way this data is interpreted depends on the current control mode. Some control modes may allow only certain values to be written; if an invalid value is written, the device will respond with a NACK after either of the data bytes, aborting the command. Some control modes may not support this command and will respond with a NACK to the command code; control modes that do support this command will always respond with an ACK to the command code.
 
 See [section 3](#3-parameters-and-control-modes) for more information about how this command's data is used.
 
@@ -197,7 +197,7 @@ See [section 3](#3-parameters-and-control-modes) for more information about how 
 - **Command code:** 0x20
 - **SMBus protocols:** read/write word
 
-Controls which values are included in samples saved to the sample buffer. Each bit corresponds to a value ID (least significant bit corresponds to value ID 0). If the bit is set, that value will be included in samples; if the bit is cleared, it won't. Note that not all 16 IDs will be used; those that are not used won't add any values to samples, even if their bit is set.
+Controls which values are included in samples saved to the sample buffer. Each bit corresponds to a value ID (least significant bit corresponds to value ID 0). If the bit is set, that value will be included in samples; if the bit is cleared, it won't. Note that not all 16 IDs will be used; those that are not used won't add any values to samples, even if their bit is set. The device will always respond with an ACK to the command code and the data bytes.
 
 Writing any non-zero value to this register will immediately (after receiving the whole command) clear the sample buffer and restart it with the specified sample values enabled. Writing a value of zero will stop any more samples from being written to the buffer; this won't clear the buffer. The device will also automatically set this register to zero if the buffer ever gets full, to prevent the buffer from overflowing. Reading this register will always return the last value successfully set, or zero; the only value the device is allowed to automatically write is a value of zero.
 
@@ -212,7 +212,7 @@ Gets or sets the sample rate divider, interpreted as an unsigned 16-bit integer.
 
 $$F_\text{sample} = \frac{ F_\text{update} }{ \text{SAMPLE\\_RATE\\_DIV} + 1 }$$
 
-where $F_\text{sample}$ is the sample rate in Hz and $F_\text{update}$ is the device's update rate in Hz. Any 16-bit value is allowed to be written by this command.
+where $F_\text{sample}$ is the sample rate in Hz and $F_\text{update}$ is the device's update rate in Hz. Any 16-bit value is allowed to be written by this command. The device will always respond with an ACK to the command code and the data bytes.
 
 Note that the sample buffer has no way of indicating when the sample rate changes; clear the sample buffer after changing the sample rate to ensure that all samples in the buffer have a known sample rate, if this is desired.
 
@@ -223,7 +223,7 @@ Reading this register will always return the last value written to it (with the 
 - **Command code:** 0x22
 - **SMBus protocols:** read block
 
-Pops and returns data directly from the sample buffer. This command reads as many bytes as are available from the sample buffer, up to 32 bytes. Since a block size of zero is not allowed, if the buffer is empty the device will respond to the command code with a NACK. The command code will always get an ACK response if there is data available in the buffer.
+Pops and returns data directly from the sample buffer. This command reads as many bytes as are available from the sample buffer, up to 32 bytes. Since a block size of zero is not allowed, if the buffer is empty the device will respond to the command code with a NACK. The device will always respond with an ACK to the command code if there is data available in the buffer.
 
 See [section 4](#4-the-sample-buffer) for more information about the sample buffer.
 
@@ -289,7 +289,7 @@ While in this mode, the controller drives the motor at a user-set velocity. Call
 - **Mode ID:** 3
 - **Parameters used:** #TODO List the parameters used
 
-While in this mode, the controller drives the motor to a user-set position. Calls to the CONTROL_UPDATE command set the target position, and the controller will try to match it. The value is interpreted as a 16-bit signed integer, with the least-significant bit being equal to one revolution division. The number of divisions per revolution is not currently defined.
+While in this mode, the controller drives the motor to a user-set position. Calls to the CONTROL_UPDATE command set the target position, and the controller will try to match it. The value is interpreted as a 16-bit signed integer (2's complement), with the least-significant bit being equal to one revolution division. The number of divisions per revolution is not currently defined.
 
 #TODO Maybe some information about the control algorithm and how the parameters are used.
 
@@ -303,14 +303,14 @@ The sample buffer is a FIFO buffer which the device can save sample to. Samples 
 
 The device defines a set of values that can be included in each sample, as listed in [section 4.3](#43-list-of-sample-values). These values are intended for things like tracking internal variables for debugging, tracking performance metrics, or logging data.
 
-Each sample is made up of up to 16 different values, configurable using the SAMPLES_EN_VALUES command. Enabled values are pushed to the buffer in ascending order (value ID 0 first, then value ID 1 and so on) with each value in little-endian order (least significant byte is pushed first). The datatype of each value is defined in [section 4.3](#43-list-of-sample-values), but must be one of the datatypes defined in [section 5](#5-list-of-data-types). Note that not all 16 sample value indices are used, and those that are used don't have to be contiguous.
+Each sample is made up of up to 16 different values, configurable using the SAMPLES_EN_VALUES command. Enabled values are pushed to the buffer in ascending ID order (value ID 0 first, then value ID 1 and so on) with each value in little-endian order (least significant byte is pushed first). The datatype of each value is defined in [section 4.3](#43-list-of-sample-values), but must be one of the datatypes defined in [section 5](#5-list-of-data-types). Note that not all 16 sample value IDs are used, and those that are used don't have to be contiguous.
 
 As an example, lets imagine the device implements four sample values:
 
-- 0: MY_VALUE_0 (uint16)
-- 1: MY_VALUE_1 (int16)
-- 4: MY_VALUE_4 (uint8)
-- 5: MY_VALUE_5 (float32)
+- ID 0: MY_VALUE_0 (uint16)
+- ID 1: MY_VALUE_1 (int16)
+- ID 4: MY_VALUE_4 (uint8)
+- ID 5: MY_VALUE_5 (float32)
 
 Setting SAMPLES_EN_VALUES to 0x0021 would enable VALUE_0 and VALUE_5, so each sample would look like this:
 
@@ -356,14 +356,14 @@ The following table lists all the data types that might be used by the protocol.
 | uint48  | 48-bit unsigned integer                          |
 | uint56  | 56-bit unsigned integer                          |
 | uint64  | 64-bit unsigned integer                          |
-| int8    | 8-bit signed integer                             |
-| int16   | 16-bit signed integer                            |
-| int24   | 24-bit signed integer                            |
-| int32   | 32-bit signed integer                            |
-| int40   | 40-bit signed integer                            |
-| int48   | 48-bit signed integer                            |
-| int56   | 56-bit signed integer                            |
-| int64   | 64-bit signed integer                            |
+| int8    | 8-bit signed integer (2's complement)            |
+| int16   | 16-bit signed integer (2's complement)           |
+| int24   | 24-bit signed integer (2's complement)           |
+| int32   | 32-bit signed integer (2's complement)           |
+| int40   | 40-bit signed integer (2's complement)           |
+| int48   | 48-bit signed integer (2's complement)           |
+| int56   | 56-bit signed integer (2's complement)           |
+| int64   | 64-bit signed integer (2's complement)           |
 | float16 | 16-bit floating point (IEE 754 half-precision)   |
 | float32 | 32-bit floating point (IEE 754 single-precision) |
 | float64 | 64-bit floating point (IEE 754 double-precision) |
